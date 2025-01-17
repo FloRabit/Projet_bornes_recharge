@@ -12,55 +12,6 @@ from shapely.geometry import shape
 ## TRAITEMENT DES DONNEES
 ####################################################################################################
 
-# Fonction pour extraire les données et les sauvegarder pour usage ultérieur, sous forme de fichiers CSV et JSON. Ce sont des données simplifiées.
-def extraction_donnees (parkings_file, iris_file, distances_file, S_file, W_file, T_file, demande_iris):
-
-    # Charger les données
-    parkings_df = pd.read_csv(parkings_file, delimiter=";")
-    iris_df = pd.read_csv(iris_file, delimiter=";")
-    distances_df = pd.read_csv(distances_file, index_col=0, delimiter=",")
-
-    # Création de la liste S (emplacements potentiels)
-    if 'gml_id' not in parkings_df.columns:
-        raise ValueError("La colonne 'gml_id' est absente du fichier des parkings.")
-    S = list(parkings_df['gml_id'])
-
-    # Création de la liste W (lieux de demande avec pondération)
-    if 'gml_id' not in iris_df.columns :
-        raise ValueError("Les colonnes 'gml_id' est absente du fichier IRIS.")
-    W = [(row['gml_id'], demande_iris) for _, row in iris_df.iterrows()]
-
-    print(f"S : \n{S}")
-    print("############################################")
-    print(f"Colonnes initiales de distances_df : \n{distances_df.columns}")
-    print("############################################")
-    print(f"Colonnes initiales de distances_df, élément 0: \n{distances_df.columns[0]}")
-
-    # Création de la matrice des distances T
-    if set(distances_df.columns) != set(S): # Vérifier que les colonnes correspondent aux identifiants des parkings
-        raise ValueError("Les colonnes du fichier des distances ne correspondent pas aux identifiants des parkings.")
-    if set(distances_df.index) != set([w[0] for w in W]):
-        raise ValueError("Les lignes du fichier des distances ne correspondent pas aux identifiants des lieux de demande.")
-    T = distances_df.to_dict(orient='index')  # Convertir en dictionnaire {j: {i: distance}}
-
-    # Vérification des structures
-    print("Liste S :", S[:5], "...")
-    print("Liste W :", W[:5], "...")
-    print("Extrait de T :", {k: v for k, v in list(T.items())[:5]})
-
-
-    # Sauvegarder S et W au format CSV
-    pd.DataFrame({'gml_id': S}).to_csv(S_file, index=False)
-    pd.DataFrame(W, columns=['gml_id', 'demande']).to_csv(W_file, index=False)
-
-    # Sauvegarder T au format JSON pour compatibilité
-    import json
-    with open(T_file, "w") as f:
-        json.dump(T, f)
-
-    print(f"Données sauvegardées :\nS -> {S_file}\nW -> {W_file}\nT -> {T_file}")
-
-
 # Fonction pour extraire les coordonnées depuis la colonne "Geo Point"
 def extract_coordinates(geo_point):
     try:
@@ -171,58 +122,76 @@ def tracer_carte(iris_df, parkings_df, selected_sites):
 ## RESOLUTION DU PROBLEME MCPL
 ####################################################################################################
 
-def mclp(T, p, Dmax, W, S):
+def mclp(T, p, Dmax, W, S, C):
     """
     Résout le problème Maximal Covering Location Problem (MCLP).
 
     Paramètres :
-        T : dict, matrice des distances {i: {j: distance_ij}} (emplacement vers demande).
+        T : dict, matrice des distances {i: {j: distance_ij}} (demande vers emplacement).
         p : int, nombre maximal de centres à implanter.
         Dmax : float, distance maximale de couverture.
         W : list, [(id, demande)], liste des lieux de demande.
         S : list, [id], liste des emplacements potentiels pour les centres.
+        C : dict, {id: capacité}, capacité de chaque emplacement potentiel.
 
     Retourne :
         selected_sites : list, liste des identifiants des emplacements sélectionnés.
         max_coverage : float, couverture totale maximale.
+        allocations : dict, {(i, j): couverture}, allocation de demande par emplacement.
     """
     # Initialisation du solveur
     solver = pywraplp.Solver.CreateSolver('SCIP')
     if not solver:
         raise Exception("Erreur lors de la création du solveur.")
 
-    # Extraire les identifiants des lieux de demande et des emplacements potentiels, ainsi que les pondérations de demande
+    # Extraire les identifiants des lieux de demande et des emplacements potentiels
     demande_ids = [w[1][0] for w in W.iterrows()]  # Liste des identifiants de lieux de demande
     site_ids = [s[1][0] for s in S.iterrows()]  # Liste des identifiants d'emplacements potentiels
     demande_weights = {w[1][0]: w[1][1] for w in W.iterrows()}  # Dictionnaire {id_demande: demande}
 
-
     # Variables de décision
     x = {i: solver.BoolVar(f"x[{i}]") for i in site_ids}  # x[i] = 1 si le site i est choisi
     y = {j: solver.BoolVar(f"y[{j}]") for j in demande_ids}  # y[j] = 1 si le lieu de demande j est couvert
+    z = {}
+    for j in demande_ids:
+        for i in site_ids:
+            if j in T and i in T[j]:  # Vérifie si le site i est à portée de la demande j
+                z[(j, i)] = solver.IntVar(0, demande_weights[j], f"z[{j},{i}]")
 
     # Contraintes
 
     # 1. Limitation du nombre de centres à implanter
     solver.Add(solver.Sum(x[i] for i in site_ids) <= p)
 
-    # 2. Couverture : si une demande est couverte, au moins un site doit être dans sa zone
+    # 2. Couverture : une demande est couverte si au moins un site est dans sa zone
     for j in demande_ids:
-        solver.Add(y[j] <= solver.Sum(x[i] for i in site_ids if T[j][i] <= Dmax))
+        solver.Add(y[j] <= solver.Sum(x[i] for i in site_ids if j in T and i in T[j] and T[j][i] <= Dmax))
 
+    # 3. Capacité des bornes
+    for i in site_ids:
+        solver.Add(solver.Sum(z[(j, i)] for j in demande_ids if j in T and i in T[j] and T[j][i] <= Dmax) <= C[i] * x[i])
+
+    
     # Objectif : maximiser la demande couverte
     solver.Maximize(solver.Sum(y[j] * demande_weights[j] for j in demande_ids))
 
     # Résolution
     status = solver.Solve()
-
-    # Traitement des résultats
     if status == pywraplp.Solver.OPTIMAL:
         selected_sites = [i for i in site_ids if x[i].solution_value() == 1]
         max_coverage = solver.Objective().Value()
-        return selected_sites, max_coverage
+        
+        # Extraire les allocations --> ne fonctionne pas pour l'instant
+        # allocations = {}
+        # for j in demande_ids:
+        #     for i in site_ids:
+        #         if (j, i) in z and z[(j, i)].solution_value() > 0:
+        #             allocations[(j, i)] = z[(j, i)].solution_value()
+        return selected_sites, max_coverage #, allocations
     else:
+        
         raise Exception("Le solveur n'a pas trouvé de solution optimale.")
+        
 
 
 ####################################################################################################
@@ -241,6 +210,7 @@ distances_file = folder + "matrice_distances.csv"
 S_file = folder + "S_list.csv"
 W_file = folder + "W_list.csv"
 T_file = folder + "T_matrix.json"
+capacite_file = folder + "capacite_sites.json"
 
 
 # Paramètres du problème
@@ -266,9 +236,11 @@ if __name__ == "__main__":
     # Charger le fichier JSON en dictionnaire Python
     with open(T_file, "r") as file:
         T_matrix = json.load(file)
+    with open(capacite_file, "r") as file:
+        C_dict = json.load(file)
 
 
-    selected_sites, max_coverage = mclp(T_matrix, p, Dmax, W_df, S_df)
+    selected_sites, max_coverage = mclp(T_matrix, p, Dmax, W_df, S_df, C_dict)
     # print("Sites sélectionnés :", selected_sites)
     print("Couverture maximale :", max_coverage)
     tracer_carte(iris_df, parkings_df, selected_sites)

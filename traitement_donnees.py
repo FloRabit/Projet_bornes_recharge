@@ -224,57 +224,6 @@ def traiter_parkings(park_file_path, iris_file_path, park_output_path, zone_id):
     print(f"Résumé : {total_parkings} parkings disponibles, {total_max_bornes} bornes maximales possibles.")
 
 
-# def generer_ve_aleatoire(bat_file_path, N_ve):
-#     """
-#     Attribue un nombre aléatoire de véhicules électriques (VE) à des bâtiments
-#     sélectionnés de manière aléatoire, tout en respectant une limite globale pour le secteur.
-
-#     Args:
-#     - bat_file_path (str): Chemin du fichier JSON contenant les bâtiments.
-#     - N_ve (int): Quantité maximale de véhicules électriques sur le secteur.
-
-#     Returns:
-#     - dict: Fichier JSON des bâtiments mis à jour avec un champ "nb_ve".
-#     """
-
-#     with open(bat_file_path, 'r', encoding='utf-8') as f:
-#         data = json.load(f)
-
-#     # Extraire les bâtiments de la structure JSON
-#     batiments = data.get("batiments", [])
-
-#     total_ve = 0
-#     # Mélanger aléatoirement les bâtiments
-#     batiments_rd = random.sample(batiments, len(batiments))
-
-#     for batiment in batiments_rd:
-#         max_ve = int(batiment.get("nb_occ_theor_18plus", 0))  # Nombre d'habitants adultes
-#         if max_ve > 0:
-#             # Générer un nombre aléatoire de VE pour ce bâtiment
-#             ve_count = random.randint(0, max_ve)
-#             # Vérifier si l'ajout dépasse la limite globale
-#             if total_ve + ve_count > N_ve:
-#                 ve_count = max(0, N_ve - total_ve)
-#             total_ve += ve_count
-#             batiment["nb_ve"] = ve_count  # Ajouter le nombre de VE au bâtiment
-
-#             # Si la limite globale est atteinte, arrêter l'attribution
-#             if total_ve >= N_ve:
-#                 break
-#         else:
-#             batiment["nb_ve"] = 0  # Pas de VE si aucun adulte
-
-#     # Mettre à 0 les VE pour les bâtiments restants non sélectionnés
-#     for batiment in batiments:
-#         if "nb_ve" not in batiment:
-#             batiment["nb_ve"] = 0
-
-#     print(f"Total de véhicules électriques générés : {total_ve}/{N_ve}.")
-
-#     # Retourner le fichier JSON mis à jour
-#     data["batiments"] = batiments
-#     return data
-
 
 def calculer_matrice_distances(bat_file_path, parkings_file, output_file):
     """
@@ -343,7 +292,6 @@ if __name__ == "__main__":
     parkings_filtres = folder + "parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances = folder + "matrice_distances_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
 
-    traiter_batiments(bat_file, zones_file, bat_filtres, zone_id, N_ve)
+    # traiter_batiments(bat_file, zones_file, bat_filtres, zone_id, N_ve)
     # traiter_parkings(parkings_file, zones_file, parkings_filtres, zone_id)
-    # generer_ve_aleatoire(bat_filtres, N_ve)
     # calculer_matrice_distances(bat_filtres, parkings_filtres, matrice_distances)

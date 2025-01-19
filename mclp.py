@@ -1,7 +1,7 @@
 import json
 from ortools.linear_solver import pywraplp
 
-def mclp(bat_file_path, parkings_file_path, mat_distances_file_path, p, Dmax):
+def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Dmax):
     """
     Résout le problème Maximal Covering Location Problem (MCLP) à partir de données JSON.
 

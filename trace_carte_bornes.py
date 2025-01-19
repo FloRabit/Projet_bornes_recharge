@@ -5,11 +5,12 @@ import contextily as ctx
 from shapely.geometry import shape, Point
 
 
-def plot_parking_and_buildings(
+def plot_parking_and_buildings_with_basemap(
     iris_file, parkings_file, buildings_file, zone_iris_id, selected_sites, output_file=None
 ):
     """
-    Trace une carte avec :
+    Trace une carte avec un plan de Rennes comme fond de carte, adapté à la zone IRIS choisie.
+    
     - La délimitation de la zone IRIS choisie.
     - Les parkings sélectionnés (taille proportionnelle au nombre de bornes installées, couleur rouge).
     - Les bâtiments (taille proportionnelle à la demande en VE, couleur verte pour ceux ayant une demande non nulle).
@@ -22,10 +23,6 @@ def plot_parking_and_buildings(
         - selected_sites (dict): Dictionnaire {parking_id: nombre_de_bornes_installées}.
         - output_file (str, optional): Chemin pour sauvegarder la carte générée (si None, la carte est affichée).
     """
-    import json
-    import geopandas as gpd
-    import matplotlib.pyplot as plt
-    from shapely.geometry import shape, Point
 
     # Charger les données IRIS
     with open(iris_file, 'r', encoding='utf-8') as f:
@@ -83,20 +80,24 @@ def plot_parking_and_buildings(
         crs="EPSG:4326"
     )
 
-    # Vérifier la validité des géométries
-    parkings_gdf = parkings_gdf[parkings_gdf.is_valid]
-    buildings_gdf = buildings_gdf[buildings_gdf.is_valid]
-    selected_iris_gdf = selected_iris_gdf[selected_iris_gdf.is_valid]
+    # Convertir toutes les données en EPSG:3857 pour le fond de carte
+    selected_iris_gdf = selected_iris_gdf.to_crs(epsg=3857)
+    parkings_gdf = parkings_gdf.to_crs(epsg=3857)
+    buildings_gdf = buildings_gdf.to_crs(epsg=3857)
+
+    # # Déterminer l'emprise géographique de la zone IRIS choisie
+    # bounds = selected_iris_gdf.total_bounds  # [minx, miny, maxx, maxy]
 
     # Séparer les bâtiments avec et sans demande
     buildings_with_demand_gdf = buildings_gdf[buildings_gdf['nb_ve'] > 0]
     buildings_no_demand_gdf = buildings_gdf[buildings_gdf['nb_ve'] == 0]
 
     # Tracer la carte
-    fig, ax = plt.subplots(figsize=(12, 12))
+    fig, ax = plt.subplots(figsize=(10, 10))
+
 
     # Tracer la zone IRIS choisie
-    selected_iris_gdf.plot(ax=ax, color='lightgrey', edgecolor='black', alpha=0.5, label="Zone IRIS")
+    selected_iris_gdf.plot(ax=ax, color='none', edgecolor='black', linewidth=2, label="Zone IRIS")
 
     # Tracer les bâtiments sans demande
     buildings_no_demand_gdf.plot(ax=ax, color='blue', markersize=5, label="Bâtiments sans demande")
@@ -110,8 +111,8 @@ def plot_parking_and_buildings(
     # Annoter les bâtiments avec demande
     for _, row in buildings_with_demand_gdf.iterrows():
         ax.text(
-            row.geometry.x, row.geometry.y, str(row['nb_ve']),
-            fontsize=8, ha='center', color='black', weight='bold'
+            row.geometry.x, row.geometry.y+15, str(row['nb_ve']),
+            fontsize=15, ha='center', color='darkgreen', weight='bold'
         )
 
     # Tracer les parkings sélectionnés (en rouge, taille proportionnelle aux bornes installées)
@@ -123,17 +124,27 @@ def plot_parking_and_buildings(
     # Annoter les parkings avec le nombre de bornes installées
     for _, row in parkings_gdf[parkings_gdf['bornes_installées'] > 0].iterrows():
         ax.text(
-            row.geometry.x, row.geometry.y, str(int(row['bornes_installées'])),
-            fontsize=10, ha='center', color='darkred', weight='bold'
+            row.geometry.x, row.geometry.y + 15, str(int(row['bornes_installées'])),
+            fontsize=15, ha='center', color='darkred', weight='bold'
         )
+
+    # Ajouter le fond de carte
+    ctx.add_basemap(
+        ax, source=ctx.providers.CartoDB.Positron, zoom=15,
+        crs=3857
+    )
+
+    # # Ajuster les limites de l'affichage à l'emprise géographique
+    # ax.set_xlim(bounds[0], bounds[2])
+    # ax.set_ylim(bounds[1], bounds[3])
 
     # Personnaliser la carte
     ax.set_title("Carte des parkings et bâtiments (Zone IRIS)", fontsize=16)
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     plt.legend()
-    plt.grid()
-    plt.tight_layout()
+    plt.grid(False)
+    # plt.tight_layout()  # Ajuster les marges automatiquement en théorie, mais cela ne semble pas fonctionner correctement
 
     # Sauvegarder ou afficher la carte
     if output_file:

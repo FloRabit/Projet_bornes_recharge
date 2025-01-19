@@ -115,7 +115,7 @@ if __name__ == '__main__':
     p=10
     Dmax=500
 
-    selected_sites, max_coverage = mclp(bat_filtres, parkings_filtres, matrice_distances, p, Dmax)
+    selected_sites, max_coverage = mclp_deloc(bat_filtres, parkings_filtres, matrice_distances, p, Dmax)
 
     print("Sites sélectionnés:", selected_sites)
     print("Couverture maximale:", max_coverage)

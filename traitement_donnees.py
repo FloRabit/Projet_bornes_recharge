@@ -5,16 +5,20 @@ import random
 
 
 
-def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id):
+def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id, N_ve):
     """
     Filtre les bâtiments appartenant à une zone cible définie par son identifiant,
     nettoie les champs inutiles, et ajoute un récapitulatif des totaux.
+    Attribue un nombre aléatoire de véhicules électriques (VE) à des bâtiments
+    sélectionnés de manière aléatoire, tout en respectant une limite globale pour le secteur.
 
     Args:
     - bat_file_path (str): Chemin du fichier JSON contenant les bâtiments.
     - iris_file_path (str): Chemin du fichier JSON contenant les zones géographiques iris.
     - bat_output_path (str): Chemin du fichier JSON de sortie.
     - zone_id (str): Identifiant (gml_id) de la zone iris cible.
+    - N_ve (int): Quantité maximale de véhicules électriques sur le secteur.
+
 
     Returns:
     - None
@@ -26,6 +30,10 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id):
     # Charger le fichier JSON des zones
     with open(iris_file_path, 'r', encoding='utf-8') as f:
         zones = json.load(f)
+
+    ###########################################################
+    # Filtrer les bâtiments dans la zone cible
+    ###########################################################
 
     # Trouver la zone cible par son gml_id
     zone_geographique = None
@@ -49,6 +57,10 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id):
             # Vérifier si le point central est dans la zone
             if center_point.within(zone_polygon):
                 batiments_dans_zone.append(item)
+    
+    ###########################################################
+    # Nettoyer les champs inutiles
+    ###########################################################
 
     # Garder uniquement les catégories souhaitées
     categories_a_conserver = ["geo_point_2d", "geo_shape", "gml_id", "nb_maison", "nb_appart", "nb_occ_theor_18plus"]
@@ -57,15 +69,52 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id):
         for item in batiments_dans_zone
     ]
 
+
+    ###########################################################
+    # Générer un nombre aléatoire de véhicules électriques (VE)
+    ###########################################################
+
+    total_ve = 0
+    # Mélanger aléatoirement les bâtiments
+    batiments_rd = random.sample(batiments_nettoyes, len(batiments_nettoyes))
+
+    for batiment in batiments_rd:
+        max_ve = int(batiment.get("nb_occ_theor_18plus", 0) or 0)  # Nombre d'habitants adultes
+        if max_ve > 0:
+            # Générer un nombre aléatoire de VE pour ce bâtiment
+            ve_count = random.randint(0, max_ve)
+            # Vérifier si l'ajout dépasse la limite globale
+            if total_ve + ve_count > N_ve:
+                ve_count = max(0, N_ve - total_ve)
+            total_ve += ve_count
+            batiment["nb_ve"] = ve_count  # Ajouter le nombre de VE au bâtiment
+
+            # Si la limite globale est atteinte, arrêter l'attribution
+            if total_ve >= N_ve:
+                break
+        else:
+            batiment["nb_ve"] = 0  # Pas de VE si aucun adulte
+
+    # Mettre à 0 les VE pour les bâtiments restants non sélectionnés
+    for batiment in batiments_nettoyes:
+        if "nb_ve" not in batiment:
+            batiment["nb_ve"] = 0
+
+    ###########################################################
+    # Calculer les totaux pour le récapitulatif
+    ###########################################################
+
     # Calculer les totaux pour le récapitulatif
     nb_appart_total = sum(batiment.get("nb_appart", 0) or 0 for batiment in batiments_nettoyes)    
     nb_maison_total = sum(batiment.get("nb_maison", 0) or 0 for batiment in batiments_nettoyes)
     nb_occ_theor_18plus_total = sum(batiment.get("nb_occ_theor_18plus", 0) or 0 for batiment in batiments_nettoyes)
+    nb_ve_total = sum(batiment.get("nb_ve", 0) or 0 for batiment in batiments_nettoyes)
 
     recapitulatif = {
         "nb_appart_total": nb_appart_total,
         "nb_maison_total": nb_maison_total,
-        "nb_occ_theor_18plus_total": nb_occ_theor_18plus_total
+        "nb_occ_theor_18plus_total": nb_occ_theor_18plus_total,
+        "nb_ve_total": nb_ve_total
     }
 
     # Ajouter le récapitulatif au début du fichier JSON
@@ -78,6 +127,8 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id):
     with open(bat_output_path, 'w', encoding='utf-8') as f:
         json.dump(resultat, f, ensure_ascii=False, indent=4)
 
+    
+    
     print(f"Les bâtiments sélectionnés et filtrés ont été sauvegardés dans '{bat_output_path}'.")
     print(f"Résumé des totaux : {recapitulatif}")
 
@@ -85,7 +136,9 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id):
 def traiter_parkings(park_file_path, iris_file_path, park_output_path, zone_id):
     """
     Filtre les parkings appartenant à une zone cible définie par son identifiant,
-    puis nettoie les champs inutiles à la suite de la simulation.
+    puis nettoie les champs inutiles à la suite de la simulation. Ajoute un champ `max_bornes`
+    correspondant au nombre maximal de bornes pouvant être installées.
+    Compte également le nombre total de parkings disponibles et le nombre maximal de bornes.
 
     Args:
     - park_file_path (str): Chemin du fichier JSON contenant les parkings.
@@ -96,6 +149,9 @@ def traiter_parkings(park_file_path, iris_file_path, park_output_path, zone_id):
     Returns:
     - None
     """
+    import json
+    from shapely.geometry import shape, Point
+
     # Charger le fichier JSON des parkings
     with open(park_file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -117,7 +173,7 @@ def traiter_parkings(park_file_path, iris_file_path, park_output_path, zone_id):
     # Créer le polygone de la zone cible
     zone_polygon = shape(zone_geographique["geometry"])
 
-    # Filtrer les bâtiments en vérifiant si leur centre est dans la zone
+    # Filtrer les parkings en vérifiant si leur centre est dans la zone
     parkings_dans_zone = []
     for item in data:
         if "geo_point_2d" in item:
@@ -129,68 +185,95 @@ def traiter_parkings(park_file_path, iris_file_path, park_output_path, zone_id):
 
     # Garder uniquement les catégories souhaitées
     categories_a_conserver = ["geo_point_2d", "geo_shape", "gml_id", "type", "nb_pl", "categorie"]
-    parkings_nettoyes = [
-        {key: item[key] for key in categories_a_conserver if key in item}
-        for item in parkings_dans_zone
-    ]
+    parkings_nettoyes = []
+    total_parkings = 0
+    total_max_bornes = 0
+
+    for item in parkings_dans_zone:
+        parking = {key: item[key] for key in categories_a_conserver if key in item}
+
+        # Ajouter le champ `max_bornes` en fonction du nombre de places
+        nb_places = parking.get("nb_pl", 0)
+        if nb_places < 20:
+            parking["max_bornes"] = 1
+        elif 20 <= nb_places <= 50:
+            parking["max_bornes"] = 2
+        else:
+            parking["max_bornes"] = 4
+
+        # Compter les parkings et les bornes maximales
+        total_parkings += 1
+        total_max_bornes += parking["max_bornes"]
+
+        parkings_nettoyes.append(parking)
+
+    # Ajouter les informations globales dans le JSON
+    resultat = {
+        "recapitulatif": {
+            "total_parkings": total_parkings,
+            "total_max_bornes": total_max_bornes
+        },
+        "parkings": parkings_nettoyes
+    }
 
     # Sauvegarder dans un nouveau fichier JSON
     with open(park_output_path, 'w', encoding='utf-8') as f:
-        json.dump(parkings_nettoyes, f, ensure_ascii=False, indent=4)
+        json.dump(resultat, f, ensure_ascii=False, indent=4)
 
-    print(f"Les parkings selectionnés et filtrés ont été sauvegardés dans '{park_output_path}'.")
+    print(f"Les parkings sélectionnés, filtrés et enrichis ont été sauvegardés dans '{park_output_path}'.")
+    print(f"Résumé : {total_parkings} parkings disponibles, {total_max_bornes} bornes maximales possibles.")
 
 
-def generer_ve_aleatoire(bat_file_path, N_ve):
-    """
-    Attribue un nombre aléatoire de véhicules électriques (VE) à des bâtiments
-    sélectionnés de manière aléatoire, tout en respectant une limite globale pour le secteur.
+# def generer_ve_aleatoire(bat_file_path, N_ve):
+#     """
+#     Attribue un nombre aléatoire de véhicules électriques (VE) à des bâtiments
+#     sélectionnés de manière aléatoire, tout en respectant une limite globale pour le secteur.
 
-    Args:
-    - bat_file_path (str): Chemin du fichier JSON contenant les bâtiments.
-    - N_ve (int): Quantité maximale de véhicules électriques sur le secteur.
+#     Args:
+#     - bat_file_path (str): Chemin du fichier JSON contenant les bâtiments.
+#     - N_ve (int): Quantité maximale de véhicules électriques sur le secteur.
 
-    Returns:
-    - dict: Fichier JSON des bâtiments mis à jour avec un champ "nb_ve".
-    """
+#     Returns:
+#     - dict: Fichier JSON des bâtiments mis à jour avec un champ "nb_ve".
+#     """
 
-    with open(bat_file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+#     with open(bat_file_path, 'r', encoding='utf-8') as f:
+#         data = json.load(f)
 
-    # Extraire les bâtiments de la structure JSON
-    batiments = data.get("batiments", [])
+#     # Extraire les bâtiments de la structure JSON
+#     batiments = data.get("batiments", [])
 
-    total_ve = 0
-    # Mélanger aléatoirement les bâtiments
-    batiments_rd = random.sample(batiments, len(batiments))
+#     total_ve = 0
+#     # Mélanger aléatoirement les bâtiments
+#     batiments_rd = random.sample(batiments, len(batiments))
 
-    for batiment in batiments_rd:
-        max_ve = int(batiment.get("nb_occ_theor_18plus", 0))  # Nombre d'habitants adultes
-        if max_ve > 0:
-            # Générer un nombre aléatoire de VE pour ce bâtiment
-            ve_count = random.randint(0, max_ve)
-            # Vérifier si l'ajout dépasse la limite globale
-            if total_ve + ve_count > N_ve:
-                ve_count = max(0, N_ve - total_ve)
-            total_ve += ve_count
-            batiment["nb_ve"] = ve_count  # Ajouter le nombre de VE au bâtiment
+#     for batiment in batiments_rd:
+#         max_ve = int(batiment.get("nb_occ_theor_18plus", 0))  # Nombre d'habitants adultes
+#         if max_ve > 0:
+#             # Générer un nombre aléatoire de VE pour ce bâtiment
+#             ve_count = random.randint(0, max_ve)
+#             # Vérifier si l'ajout dépasse la limite globale
+#             if total_ve + ve_count > N_ve:
+#                 ve_count = max(0, N_ve - total_ve)
+#             total_ve += ve_count
+#             batiment["nb_ve"] = ve_count  # Ajouter le nombre de VE au bâtiment
 
-            # Si la limite globale est atteinte, arrêter l'attribution
-            if total_ve >= N_ve:
-                break
-        else:
-            batiment["nb_ve"] = 0  # Pas de VE si aucun adulte
+#             # Si la limite globale est atteinte, arrêter l'attribution
+#             if total_ve >= N_ve:
+#                 break
+#         else:
+#             batiment["nb_ve"] = 0  # Pas de VE si aucun adulte
 
-    # Mettre à 0 les VE pour les bâtiments restants non sélectionnés
-    for batiment in batiments:
-        if "nb_ve" not in batiment:
-            batiment["nb_ve"] = 0
+#     # Mettre à 0 les VE pour les bâtiments restants non sélectionnés
+#     for batiment in batiments:
+#         if "nb_ve" not in batiment:
+#             batiment["nb_ve"] = 0
 
-    print(f"Total de véhicules électriques générés : {total_ve}/{N_ve}.")
+#     print(f"Total de véhicules électriques générés : {total_ve}/{N_ve}.")
 
-    # Retourner le fichier JSON mis à jour
-    data["batiments"] = batiments
-    return data
+#     # Retourner le fichier JSON mis à jour
+#     data["batiments"] = batiments
+#     return data
 
 
 def calculer_matrice_distances(bat_file_path, parkings_file, output_file):
@@ -207,13 +290,15 @@ def calculer_matrice_distances(bat_file_path, parkings_file, output_file):
     """
     # Charger les fichiers JSON
     with open(bat_file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+        data_bat = json.load(f)
 
     # Extraire les bâtiments de la structure JSON
-    batiments = data.get("batiments", [])
+    batiments = data_bat.get("batiments", [])
 
     with open(parkings_file, 'r', encoding='utf-8') as f:
-        parkings = json.load(f)
+        data_parkings = json.load(f)
+    
+    parkings = data_parkings.get("parkings", [])
 
     # Extraire les points des bâtiments et des parkings
     points_batiments = [
@@ -258,6 +343,7 @@ if __name__ == "__main__":
     parkings_filtres = folder + "parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances = folder + "matrice_distances_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
 
-    traiter_batiments(bat_file, zones_file, bat_filtres, zone_id)
+    traiter_batiments(bat_file, zones_file, bat_filtres, zone_id, N_ve)
     # traiter_parkings(parkings_file, zones_file, parkings_filtres, zone_id)
+    # generer_ve_aleatoire(bat_filtres, N_ve)
     # calculer_matrice_distances(bat_filtres, parkings_filtres, matrice_distances)

@@ -5,7 +5,7 @@ import random
 
 
 
-def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id, N_ve):
+def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id, N_ve_2000):
     """
     Filtre les bâtiments appartenant à une zone cible définie par son identifiant,
     nettoie les champs inutiles, et ajoute un récapitulatif des totaux.
@@ -17,7 +17,7 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id, N
     - iris_file_path (str): Chemin du fichier JSON contenant les zones géographiques iris.
     - bat_output_path (str): Chemin du fichier JSON de sortie.
     - zone_id (str): Identifiant (gml_id) de la zone iris cible.
-    - N_ve (int): Quantité maximale de véhicules électriques sur le secteur.
+    - N_ve (int): Quantité maximale de véhicules électriques sur le secteur, normalisé sur un secteur de 2 000 personnes.
 
 
     Returns:
@@ -74,31 +74,10 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id, N
     # Générer un nombre aléatoire de véhicules électriques (VE)
     ###########################################################
 
-    total_ve = 0
-    # Mélanger aléatoirement les bâtiments
-    batiments_rd = random.sample(batiments_nettoyes, len(batiments_nettoyes))
-
-    for batiment in batiments_rd:
-        max_ve = int(batiment.get("nb_occ_theor_18plus", 0) or 0)  # Nombre d'habitants adultes
-        if max_ve > 0:
-            # Générer un nombre aléatoire de VE pour ce bâtiment
-            ve_count = random.randint(0, max_ve)
-            # Vérifier si l'ajout dépasse la limite globale
-            if total_ve + ve_count > N_ve:
-                ve_count = max(0, N_ve - total_ve)
-            total_ve += ve_count
-            batiment["nb_ve"] = ve_count  # Ajouter le nombre de VE au bâtiment
-
-            # Si la limite globale est atteinte, arrêter l'attribution
-            if total_ve >= N_ve:
-                break
-        else:
-            batiment["nb_ve"] = 0  # Pas de VE si aucun adulte
-
-    # Mettre à 0 les VE pour les bâtiments restants non sélectionnés
     for batiment in batiments_nettoyes:
-        if "nb_ve" not in batiment:
-            batiment["nb_ve"] = 0
+        nb_occ_theor_18plus = batiment.get("nb_occ_theor_18plus", 0) or 0
+        batiment["nb_ve_potentiel"] =  N_ve_2000 * nb_occ_theor_18plus/2000 # Pas de VE si aucun adulte
+
 
     ###########################################################
     # Calculer les totaux pour le récapitulatif
@@ -108,7 +87,7 @@ def traiter_batiments(bat_file_path, iris_file_path, bat_output_path, zone_id, N
     nb_appart_total = sum(batiment.get("nb_appart", 0) or 0 for batiment in batiments_nettoyes)    
     nb_maison_total = sum(batiment.get("nb_maison", 0) or 0 for batiment in batiments_nettoyes)
     nb_occ_theor_18plus_total = sum(batiment.get("nb_occ_theor_18plus", 0) or 0 for batiment in batiments_nettoyes)
-    nb_ve_total = sum(batiment.get("nb_ve", 0) or 0 for batiment in batiments_nettoyes)
+    nb_ve_total = N_ve_2000 * nb_occ_theor_18plus_total // 2000
 
     recapitulatif = {
         "nb_appart_total": nb_appart_total,
@@ -193,13 +172,9 @@ def traiter_parkings(park_file_path, iris_file_path, park_output_path, zone_id):
         parking = {key: item[key] for key in categories_a_conserver if key in item}
 
         # Ajouter le champ `max_bornes` en fonction du nombre de places
-        nb_places = parking.get("nb_pl", 0)
-        if nb_places < 20:
-            parking["max_bornes"] = 1
-        elif 20 <= nb_places <= 50:
-            parking["max_bornes"] = 2
-        else:
-            parking["max_bornes"] = 4
+        nb_places = parking.get("nb_pl", 0) or 0
+
+        parking["max_bornes"] = int(0.1*nb_places) + 1 # Prendre la partie entière supérieure de 10% des places
 
         # Compter les parkings et les bornes maximales
         total_parkings += 1
@@ -222,7 +197,6 @@ def traiter_parkings(park_file_path, iris_file_path, park_output_path, zone_id):
 
     print(f"Les parkings sélectionnés, filtrés et enrichis ont été sauvegardés dans '{park_output_path}'.")
     print(f"Résumé : {total_parkings} parkings disponibles, {total_max_bornes} bornes maximales possibles.")
-
 
 
 def calculer_matrice_distances(bat_file_path, parkings_file, output_file):

@@ -280,7 +280,7 @@ def calculer_matrice_distances(bat_file_path, parkings_file, output_file):
 if __name__ == "__main__":
 
     folder = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/codes/data_global/"
-    bat_file = folder + "batiments-rennes-metropole.json"
+    bat_file = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
     zones_file = folder + "iris_version_rennes_metropole.json"
     parkings_file = folder + "parkings.json"
 

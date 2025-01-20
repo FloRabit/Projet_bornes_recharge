@@ -2,9 +2,11 @@ import traitement_donnees
 import mclp 
 import trace_carte_bornes
 
+
+
 if __name__ == "__main__":
     folder = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/codes/data_global/"
-    bat_file = folder + "batiments-rennes-metropole.json"
+    bat_file = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
     zone_file = folder + "iris_version_rennes_metropole.json"
     parkings_file = folder + "parkings.json"
 
@@ -19,10 +21,10 @@ if __name__ == "__main__":
     matrice_distances = folder + "matrice_distances_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
 
 
-    # Traitement des données
-    traitement_donnees.traiter_batiments(bat_file, zone_file, bat_filtres, zone_id, N_ve)
-    traitement_donnees.traiter_parkings(parkings_file, zone_file, parkings_filtres, zone_id)
-    traitement_donnees.calculer_matrice_distances(bat_filtres, parkings_filtres, matrice_distances)
+    # # Traitement des données
+    # traitement_donnees.traiter_batiments(bat_file, zone_file, bat_filtres, zone_id, N_ve)
+    # traitement_donnees.traiter_parkings(parkings_file, zone_file, parkings_filtres, zone_id)
+    # traitement_donnees.calculer_matrice_distances(bat_filtres, parkings_filtres, matrice_distances)
 
     # Résolution du problème
     selected_sites, max_coverage = mclp.mclp_deloc(bat_filtres, parkings_filtres, matrice_distances, p, Dmax)

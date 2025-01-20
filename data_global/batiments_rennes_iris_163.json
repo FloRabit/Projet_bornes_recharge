@@ -820,7 +820,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -1048,7 +1048,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -1300,7 +1300,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -1460,7 +1460,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -2008,7 +2008,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -2924,7 +2924,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -3316,7 +3316,7 @@
             "nb_maison": 0.0,
             "nb_appart": 33.0,
             "nb_occ_theor_18plus": 42.9728356471076,
-            "nb_ve": 0
+            "nb_ve": 19
         },
         {
             "geo_point_2d": {
@@ -3768,7 +3768,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -5596,7 +5596,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -6156,7 +6156,7 @@
             "nb_maison": 0.0,
             "nb_appart": 2.0,
             "nb_occ_theor_18plus": 2.5258119387634,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -7612,7 +7612,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -8028,7 +8028,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -8352,7 +8352,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -9400,7 +9400,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -10640,7 +10640,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -10852,7 +10852,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -14548,7 +14548,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -15740,7 +15740,7 @@
             "nb_maison": 0.0,
             "nb_appart": 13.0,
             "nb_occ_theor_18plus": 13.4345302969781,
-            "nb_ve": 0
+            "nb_ve": 4
         },
         {
             "geo_point_2d": {
@@ -17280,7 +17280,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -17612,7 +17612,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -17792,7 +17792,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -17844,7 +17844,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -18116,7 +18116,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -19340,7 +19340,7 @@
             "nb_maison": 0.0,
             "nb_appart": 24.0,
             "nb_occ_theor_18plus": 23.1499497331993,
-            "nb_ve": 10
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -20236,7 +20236,7 @@
             "nb_maison": 5.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 8.492552645095,
-            "nb_ve": 0
+            "nb_ve": 7
         },
         {
             "geo_point_2d": {
@@ -20760,7 +20760,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -21316,7 +21316,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -21716,7 +21716,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -21844,7 +21844,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -21952,7 +21952,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -22008,7 +22008,7 @@
             "nb_maison": 0.0,
             "nb_appart": 12.0,
             "nb_occ_theor_18plus": 11.5749748665996,
-            "nb_ve": 10
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -22224,7 +22224,7 @@
             "nb_maison": 0.0,
             "nb_appart": 7.0,
             "nb_occ_theor_18plus": 10.1372804431834,
-            "nb_ve": 0
+            "nb_ve": 8
         },
         {
             "geo_point_2d": {
@@ -23048,7 +23048,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -23848,7 +23848,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -27648,7 +27648,7 @@
             "nb_maison": 3.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 5.095531587057,
-            "nb_ve": 3
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -27892,7 +27892,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -28344,7 +28344,7 @@
             "nb_maison": 0.0,
             "nb_appart": 16.0,
             "nb_occ_theor_18plus": 20.3101352456251,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -31056,7 +31056,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -32240,7 +32240,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -32844,7 +32844,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -33284,7 +33284,7 @@
             "nb_maison": 0.0,
             "nb_appart": 6.0,
             "nb_occ_theor_18plus": 9.00836262914044,
-            "nb_ve": 2
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -34238,7 +34238,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {
@@ -35054,7 +35054,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -36006,7 +36006,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.93196806664353,
-            "nb_ve": 1
+            "nb_ve": 0
         },
         {
             "geo_point_2d": {
@@ -37002,7 +37002,7 @@
             "nb_maison": 1.0,
             "nb_appart": 0.0,
             "nb_occ_theor_18plus": 1.698510529019,
-            "nb_ve": 0
+            "nb_ve": 1
         },
         {
             "geo_point_2d": {

@@ -35,6 +35,9 @@ def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rm
     site_ids = [parking['gml_id'] for parking in data_parkings.get("parkings", [])]
     C = {parking['gml_id']: parking['max_bornes'] for parking in data_parkings.get("parkings", [])}
 
+    # Charger les données des parkings pour récupérer les informations de localisation pour les sites sélectionnés
+    parking_info = {parking["gml_id"]: parking["geo_point_2d"] for parking in data_parkings.get("parkings", [])}
+
     # Initialisation du solveur
     solver = pywraplp.Solver.CreateSolver('SCIP')
     if not solver:
@@ -74,7 +77,14 @@ def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rm
     # Résolution
     status = solver.Solve()
     if status == pywraplp.Solver.OPTIMAL:
-        selected_sites = {i: int(x[i].solution_value()) for i in site_ids if x[i].solution_value() > 0}
+        selected_sites = [
+            {
+                "gml_id": i,
+                "nb_bornes_installees": int(x[i].solution_value()),
+                "geo_point": parking_info.get(i, None)
+            }
+            for i in site_ids if x[i].solution_value() > 0
+        ]
         max_coverage = solver.Objective().Value()
         return selected_sites, max_coverage
     else:
@@ -84,21 +94,21 @@ def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rm
 
 if __name__ == '__main__':
 
-    zone_id = "iris.163" #identifiant de la zone cible
-
-    folder = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/codes/data_global/"
-    bat_file = folder + "batiments-rennes-metropole.json"
-    zones_file = folder + "iris_version_rennes_metropole.json"
-    parkings_file = folder + "parkings.json"
-
-    bat_filtres = folder + "batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    parkings_filtres = folder + "parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    matrice_distances = folder + "matrice_distances_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-
+    zone_id = "iris.160" #identifiant de la zone cible
     p=10
     Rmax=500
 
-    selected_sites, max_coverage = mclp_deloc(bat_filtres, parkings_filtres, matrice_distances, p, Rmax)
+    folder = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/codes/"
+    bat_file = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
+    iris_file = folder + "data_global/iris_version_rennes_metropole.json"
+    parkings_file = folder + "data_global/parkings.json"
+
+    bat_filtres = folder + "data_local/batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    parkings_filtres = folder + "data_local/parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    matrice_distances_bat_park = folder + "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    matrice_distances_tf_park = folder + "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+
+    selected_sites, max_coverage = mclp_deloc(bat_filtres, parkings_filtres, matrice_distances_bat_park, p, Rmax)
 
     print("Sites sélectionnés:", selected_sites)
     print("Couverture maximale:", max_coverage)

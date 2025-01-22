@@ -1,7 +1,6 @@
 import traitement_donnees
 import mclp 
-import trace_carte_bornes
-import json
+import trace_cartes
 import os # Pour le nettoyage des fichiers au lancement de la simulation
 import matplotlib.pyplot as plt
 
@@ -27,7 +26,7 @@ def supprimer_tous_les_fichiers(dossier):
 
 if __name__ == "__main__":
     # Paramètres
-    zone_id = "iris.160" #identifiant de la zone cible
+    zone_id = "iris.163" #identifiant de la zone cible
     N_ve_2000 = 50 #nombre de véhicules électriques à générer
     cout_moy_22kW = 1000
     Rmax=200
@@ -66,5 +65,5 @@ if __name__ == "__main__":
     traitement_donnees.calculer_matrice_distances_tf_parkings(transfo_filtres, selected_sites, matrice_distances_tf_park)
 
     # Affichage de la carte
-    trace_carte_bornes.plot_parking_and_buildings_with_basemap(iris_file, bat_filtres, zone_id, selected_sites, Rmax, img_plot_park_bat )
-    trace_carte_bornes.plot_parking_and_tf_with_basemap(iris_file, transfo_filtres, selected_sites, matrice_distances_tf_park, zone_id, Rmax, max_connections_per_transformer, output_file=img_plot_tf_park)
+    trace_cartes.plot_parking_and_buildings_with_basemap(iris_file, bat_filtres, zone_id, selected_sites, Rmax, img_plot_park_bat )
+    trace_cartes.plot_parking_and_tf_with_basemap(iris_file, transfo_filtres, selected_sites, matrice_distances_tf_park, zone_id, Rmax, max_connections_per_transformer, output_file=img_plot_tf_park)

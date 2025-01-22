@@ -2,43 +2,42 @@ import json
 from ortools.linear_solver import pywraplp
 
     
-def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rmax, cout_unitaire):
+def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rmax):
     """
-    Résout le problème Maximal Covering Location Problem (MCLP) avec une dimension économique et géolocalisation.
+    Résout le problème Maximal Covering Location Problem (MCLP) à partir de données JSON.
 
     Args:
         - bat_file_path (str): Chemin du fichier JSON contenant les bâtiments de la zone à couvrir.
         - parkings_file_path (str): Chemin du fichier JSON contenant les parkings de la zone à couvrir.
-        - mat_distances_file_path (str): Chemin du fichier JSON contenant la matrice des distances entre les bâtiments et les parkings.
+        - mat_distances_file_path (str): Chemin du fichier JSON contenant la matrice des distances entre les batiments de bat_file_path et les parkings de parkings_file_path.
         - p (int): Nombre maximal de bornes à implanter.
         - Rmax (float): Distance maximale de couverture.
-        - cout_unitaire (float): Coût unitaire pour une borne.
 
     Returns:
-        - selected_sites : list, informations sur les parkings sélectionnés avec leur géolocalisation et coût total.
-        - rapport_couverture_cout : float, rapport couverture/coût total.
+        - selected_sites : dict, nombre de bornes à implanter dans chaque parking {parking_id: nombre_de_bornes}.
+        - max_coverage : float, couverture totale maximale.
     """
-
-    # Charger les données des bâtiments, parkings et distances
+    # Charger les données des bâtiments
     with open(bat_file_path, 'r', encoding='utf-8') as f:
         data_bat = json.load(f)
+
+    # Charger les données des parkings
     with open(parkings_file_path, 'r', encoding='utf-8') as f:
         data_parkings = json.load(f)
+    
+    # Charger la matrice des distances
     with open(mat_distances_file_path, 'r', encoding='utf-8') as f:
-        T = json.load(f)
+        T = json.load(f)  # Liste des distances
 
     # Extraire les informations nécessaires
-    demande_ids = [bat['gml_id'] for bat in data_bat.get("batiments", []) if bat['nb_ve_potentiel'] > 0]
-    demande_weights = {bat['gml_id']: bat['nb_ve_potentiel'] for bat in data_bat.get("batiments", []) if bat['nb_ve_potentiel'] > 0}
-    site_ids = [park['gml_id'] for park in data_parkings.get("parkings", [])]
-    C = {park['gml_id']: park['max_bornes'] for park in data_parkings.get("parkings", [])}
-    parking_geopoints = {park['gml_id']: park['geo_point_2d'] for park in data_parkings.get("parkings", [])}
+    demande_ids = [batiment['gml_id'] for batiment in data_bat.get("batiments", []) if batiment['nb_ve_potentiel'] > 0]
+    demande_weights = {batiment['gml_id']: batiment['nb_ve_potentiel'] for batiment in data_bat.get("batiments", []) if batiment['nb_ve_potentiel'] > 0}
 
-    print(data_parkings.get("recapitulatif"))
-    print ("okkkkkkkkkkkkkkkkkkkkk")
+    site_ids = [parking['gml_id'] for parking in data_parkings.get("parkings", [])]
+    C = {parking['gml_id']: parking['max_bornes'] for parking in data_parkings.get("parkings", [])}
 
-    total_max_bornes = data_parkings.get("recapitulatif", [])["total_max_bornes"]
-    nb_ve_total = data_bat.get("recapitulatif", [])["nb_ve_total"]
+    # Charger les données des parkings pour récupérer les informations de localisation pour les sites sélectionnés
+    parking_info = {parking["gml_id"]: parking["geo_point_2d"] for parking in data_parkings.get("parkings", [])}
 
     # Initialisation du solveur
     solver = pywraplp.Solver.CreateSolver('SCIP')
@@ -49,6 +48,8 @@ def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rm
     x = {i: solver.IntVar(0, C[i], f"x[{i}]") for i in site_ids}  # Nombre de bornes installées
     y = {j: solver.NumVar(0, demande_weights[j], f"y[{j}]") for j in demande_ids}  # Demande couverte
     z = {}
+
+    # Création de z uniquement pour les parkings à distance <= Rmax
     for entry in T:
         batiment_id = entry["batiment_id"]
         if batiment_id in demande_ids:
@@ -56,35 +57,23 @@ def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rm
                 if distance <= Rmax and parking_id in site_ids:
                     z[(batiment_id, parking_id)] = solver.NumVar(0, demande_weights[batiment_id], f"z[{batiment_id},{parking_id}]")
 
-    # Variables auxiliaires pour les coûts ajustés
-    discount_cost = {i: solver.NumVar(0, float('inf'), f"discount_cost[{i}]") for i in site_ids}
-    adjusted_costs = {i: solver.NumVar(0, float('inf'), f"adjusted_cost[{i}]") for i in site_ids}
+    # Contraintes
+    solver.Add(solver.Sum(x[i] for i in site_ids) <= p)  # Limite du nombre de bornes
 
-    # Contraintes pour calculer discount_cost et adjusted_costs
-    for i in site_ids:
-        solver.Add(discount_cost[i] >= 0)
-        solver.Add(discount_cost[i] <= x[i] * 0.5)  # Plafonner le discount à 50%
-        solver.Add(adjusted_costs[i] == x[i] * cout_unitaire - discount_cost[i] * cout_unitaire)
-
-    # Calcul du coût total
-    cost_total = solver.NumVar(0, float('inf'), "cost_total")
-    solver.Add(cost_total == solver.Sum(adjusted_costs[i] for i in site_ids))
-
-    # Contraintes pour la demande couverte
-    solver.Add(solver.Sum(x[i] for i in site_ids) <= p)
     for j in demande_ids:
-        solver.Add(y[j] == solver.Sum(z[(j, i)] for i in site_ids if (j, i) in z))
+        solver.Add(y[j] == solver.Sum(z[(j, i)] for i in site_ids if (j, i) in z))  # Demande couverte
+
     for j in demande_ids:
         for i in site_ids:
             if (j, i) in z:
-                solver.Add(z[(j, i)] <= demande_weights[j])
-                solver.Add(z[(j, i)] <= x[i] * demande_weights[j])
+                solver.Add(z[(j, i)] <= demande_weights[j])  # Limite de couverture par bâtiment
+                solver.Add(z[(j, i)] <= x[i] * demande_weights[j])  # Dépend des bornes disponibles
+
     for i in site_ids:
-        solver.Add(solver.Sum(z[(j, i)] for j in demande_ids if (j, i) in z) <= x[i] * C[i])
-    
-    # Fonction objectif : maximiser couverture et minimiser coût.
-    # Impossible de faire couverture / coût car la fonction objectif doit être linéaire, donc on maximise alpha*couverture - beta*coût
-    solver.Maximize(1/nb_ve_total * solver.Sum(y[j] for j in demande_ids) - 1/(total_max_bornes*cout_unitaire) * cost_total )
+        solver.Add(solver.Sum(z[(j, i)] for j in demande_ids if (j, i) in z) <= x[i] * C[i])  # Capacité du parking
+
+    # Objectif : maximiser la demande couverte
+    solver.Maximize(solver.Sum(y[j] for j in demande_ids))
 
     # Résolution
     status = solver.Solve()
@@ -93,13 +82,12 @@ def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rm
             {
                 "gml_id": i,
                 "nb_bornes_installees": int(x[i].solution_value()),
-                "cout_total": adjusted_costs[i].solution_value(),
-                "geo_point_2d": parking_geopoints.get(i, None)  # Ajouter les coordonnées géographiques
+                "geo_point": parking_info.get(i, None)
             }
             for i in site_ids if x[i].solution_value() > 0
         ]
-        rapport_couverture_cout = solver.Objective().Value()
-        return selected_sites, rapport_couverture_cout
+        max_coverage = solver.Objective().Value()
+        return selected_sites, max_coverage
     else:
         raise Exception("Le solveur n'a pas trouvé de solution optimale.")
 

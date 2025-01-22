@@ -1,0 +1,224 @@
+{
+    "recapitulatif": {
+        "total_parkings": 9,
+        "total_max_bornes": 61
+    },
+    "parkings": [
+        {
+            "geo_point_2d": {
+                "lon": -1.6662974569726896,
+                "lat": 48.126251262208235
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.66629745697269,
+                            48.126251262208235
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.259",
+            "type": "Parking usuel",
+            "nb_pl": 40,
+            "categorie": "Non renseigné",
+            "max_bornes": 5
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.677050150830271,
+                "lat": 48.13024935744978
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.677050150830271,
+                            48.13024935744978
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.3737",
+            "type": "Parking usuel",
+            "nb_pl": 68,
+            "categorie": "De 50 à 100 places",
+            "max_bornes": 7
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.6679059993991372,
+                "lat": 48.1257134413723
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.667905999399137,
+                            48.1257134413723
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.6236",
+            "type": "Non renseigné",
+            "nb_pl": 22,
+            "categorie": "Non renseigné",
+            "max_bornes": 3
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.6699356611245526,
+                "lat": 48.13058145538034
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.669935661124553,
+                            48.13058145538034
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.6388",
+            "type": "Non renseigné",
+            "nb_pl": 53,
+            "categorie": "Non renseigné",
+            "max_bornes": 6
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.6663364235490388,
+                "lat": 48.12697682203028
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.666336423549039,
+                            48.12697682203028
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.631",
+            "type": "Parking usuel",
+            "nb_pl": 40,
+            "categorie": "Non renseigné",
+            "max_bornes": 5
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.6661667039032404,
+                "lat": 48.12828101953456
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.66616670390324,
+                            48.12828101953456
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.6267",
+            "type": "Non renseigné",
+            "nb_pl": 178,
+            "categorie": "Non renseigné",
+            "max_bornes": 18
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.6697674628718928,
+                "lat": 48.12695055580737
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.669767462871893,
+                            48.12695055580737
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.217",
+            "type": "Parking usuel",
+            "nb_pl": 27,
+            "categorie": "Moins de 50 places",
+            "max_bornes": 3
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.6750591581538372,
+                "lat": 48.130360950891706
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.675059158153837,
+                            48.130360950891706
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.6871",
+            "type": "Parking usuel",
+            "nb_pl": 98,
+            "categorie": "Non renseigné",
+            "max_bornes": 10
+        },
+        {
+            "geo_point_2d": {
+                "lon": -1.6667083642286962,
+                "lat": 48.125810358608476
+            },
+            "geo_shape": {
+                "type": "Feature",
+                "geometry": {
+                    "coordinates": [
+                        [
+                            -1.666708364228696,
+                            48.125810358608476
+                        ]
+                    ],
+                    "type": "MultiPoint"
+                },
+                "properties": {}
+            },
+            "gml_id": "v_parking.632",
+            "type": "Parking usuel",
+            "nb_pl": 30,
+            "categorie": "Non renseigné",
+            "max_bornes": 4
+        }
+    ]
+}

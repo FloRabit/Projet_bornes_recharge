@@ -5,7 +5,7 @@ import os # Pour le nettoyage des fichiers au lancement de la simulation
 import matplotlib.pyplot as plt
 import json
 
-def supprimer_tous_les_fichiers(dossier):
+def nettoyer_dossier(dossier):
     """
     Supprime tous les fichiers d'un dossier local.
 
@@ -72,15 +72,16 @@ if __name__ == "__main__":
     transfo_filtres = folder + "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_bat_park = folder + "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_tf_park = folder + "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    selected_sites_path = folder + "data_local/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    asso_tf_bornes_path = folder + "data_local/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    selected_sites_path = folder + "output/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    asso_tf_bornes_path = folder + "output/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
 
-    img_plot_park_bat = folder + "data_local/img_plot_park_bat_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
-    img_plot_tf_park = folder + "data_local/img_plot_tf_park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
+    img_plot_park_bat = folder + "output/img_plot_park_bat_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
+    img_plot_tf_park = folder + "output/img_plot_tf_park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
 
 
     # Nettoyage des fichiers locaux
-    supprimer_tous_les_fichiers(folder + "data_local")
+    nettoyer_dossier(folder + "data_local")
+    nettoyer_dossier(folder + "output")
     
     # Traitement des données
     traitement_donnees.traiter_batiments(bat_file, iris_file, bat_filtres, zone_id, N_ve_2000)

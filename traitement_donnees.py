@@ -324,7 +324,7 @@ def calculer_matrice_distances_bat_parkings(bat_file_path, parkings_file, output
     print(f"La matrice des distances a été sauvegardée dans '{output_file}'.")
 
 
-def calculer_matrice_distances_tf_parkings(tf_file_path, selected_sites, output_file):
+def calculer_matrice_distances_tf_parkings(tf_file_path, selected_sites_path, output_file):
     """
     Calcule une matrice des distances entre des transformateurs et des parkings sélectionnés avec des bornes.
 
@@ -339,6 +339,10 @@ def calculer_matrice_distances_tf_parkings(tf_file_path, selected_sites, output_
     # Charger les fichiers JSON
     with open(tf_file_path, 'r', encoding='utf-8') as f:
         transformateurs = json.load(f)
+
+    # Charger le fichier JSON des sites sélectionnés
+    with open(selected_sites_path, 'r', encoding='utf-8') as f:
+        selected_sites = json.load(f)
 
     # Construire les points des parkings à partir de selected_sites
     points_parkings = [
@@ -370,6 +374,7 @@ def calculer_matrice_distances_tf_parkings(tf_file_path, selected_sites, output_
     print(f"La matrice des distances a été sauvegardée dans '{output_file}'.")
 
 
+
 if __name__ == "__main__":
 
     zone_id = "iris.160" #identifiant de la zone cible
@@ -383,7 +388,7 @@ if __name__ == "__main__":
 
     bat_filtres = folder + "data_local/batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     parkings_filtres = folder + "data_local/parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    transfo_filtres = folder + "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    transfo_filtres_path = folder + "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_bat_park = folder + "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_tf_park = folder + "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
 
@@ -391,6 +396,6 @@ if __name__ == "__main__":
 
     # traiter_batiments(bat_file, iris_file, bat_filtres, zone_id, N_ve)
     # traiter_parkings(parkings_file, iris_file, parkings_filtres, zone_id)    
-    # traiter_transfo(transfo_file, iris_file, transfo_filtres, zone_id)
+    # traiter_transfo(transfo_file, iris_file, transfo_filtres_path, zone_id)
     # calculer_matrice_distances_bat_parkings(bat_filtres, parkings_filtres, matrice_distances_bat_park)
-    # calculer_matrice_distances_tf_parkings(transfo_filtres, selected_sites, matrice_distances_tf_park)
+    # calculer_matrice_distances_tf_parkings(transfo_filtres_path, selected_sites, matrice_distances_tf_park)

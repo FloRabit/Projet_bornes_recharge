@@ -152,14 +152,3 @@ Ce module est dédié au nettoyage et au prétraitement des données :
 4. **Tester différents scénarios** :
    Modifiez les paramètres dans `simulation.py` pour explorer différentes solutions et trouver celle qui correspond le mieux à vos contraintes.
 
----
-
-## **Contributions**
-
-Si vous souhaitez contribuer ou proposer des améliorations, n'hésitez pas à soumettre une **pull request** ou à ouvrir une **issue** sur le dépôt GitHub.
-
----
-
-## **Licence**
-
-Ce projet est sous licence MIT. Vous êtes libre de l'utiliser, le modifier et le distribuer tant que vous respectez les termes de la licence.

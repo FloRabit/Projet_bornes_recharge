@@ -11,7 +11,7 @@ import matplotlib.colors as colors # faire un dégradé de couleur
 
 
 def plot_parking_and_buildings_with_basemap(
-    iris_file, bat_file, zone_iris_id, selected_sites, R, output_file=None
+    iris_file, bat_file, zone_iris_id, selected_sites_path, R, output_file=None
 ):
     """
     Trace une carte avec un plan de Rennes comme fond de carte, adapté à la zone IRIS choisie.
@@ -25,10 +25,13 @@ def plot_parking_and_buildings_with_basemap(
         - parkings_file (str): Chemin du fichier JSON contenant tous les parkings de la zone IRIS.
         - bat_file (str): Chemin du fichier JSON contenant les données des bâtiments.
         - zone_iris_id (str): Identifiant de la zone IRIS à afficher.
-        - selected_sites (list): Liste de dictionnaires contenant gml_id, nb_bornes_installees et geo_point.
+        - selected_sites_path (str): Chemin du fichier JSON contenant les parkings sélectionnés.
         - R (float): Distance de couverture des bornes installées. ATTENTION : C'est un rayon !
         - output_file (str, optional): Chemin pour sauvegarder la carte générée (si None, la carte est affichée).
     """
+    # Charger les données des parkings sélectionnés
+    with open(selected_sites_path, 'r', encoding='utf-8') as f:
+        selected_sites = json.load(f)
 
     # Charger les données IRIS
     with open(iris_file, 'r', encoding='utf-8') as f:
@@ -143,7 +146,7 @@ def plot_parking_and_buildings_with_basemap(
 
 
 def plot_parking_and_tf_with_basemap(
-    iris_file, tf_file, selected_sites, matrice_distances_tf_park, zone_iris_id, R, max_connections_per_transformer, output_file=None
+    iris_file, tf_file, selected_sites_path, asso_tf_bornes_path, zone_iris_id, R, output_file=None
 ):
     """
     Trace une carte avec un plan de Rennes comme fond de carte, adapté à la zone IRIS choisie.
@@ -156,12 +159,16 @@ def plot_parking_and_tf_with_basemap(
     Args:
         - iris_file (str): Chemin du fichier JSON contenant les zones IRIS.
         - tf_file (str): Chemin du fichier JSON contenant les transformateurs.
-        - selected_sites (list): Liste de dictionnaires contenant gml_id, nb_bornes_installees, et geo_point.
-        - matrice_distances_tf_park (list): Liste de dictionnaires contenant les distances entre transformateurs et parkings.
+        - selected_sites_path (str): Chemin du fichier JSON contenant les parkings sélectionnés.
+        - asso_tf_bornes_path (str): Chemin du fichier JSON contenant l'association transformateurs-bornes.
         - zone_iris_id (str): Identifiant de la zone IRIS à afficher.
         - R (float): Distance de couverture des bornes installées. ATTENTION : C'est un rayon !
         - output_file (str, optional): Chemin pour sauvegarder la carte générée (si None, la carte est affichée).
     """
+    # Charger les données des parkings sélectionnés
+    with open(selected_sites_path, 'r', encoding='utf-8') as f:
+        selected_sites = json.load(f)
+
     # Charger les données IRIS
     with open(iris_file, 'r', encoding='utf-8') as f:
         iris_data = json.load(f)
@@ -197,9 +204,6 @@ def plot_parking_and_tf_with_basemap(
         crs="EPSG:4326"
     )
 
-    with open(matrice_distances_tf_park, 'r', encoding='utf-8') as f:
-        matrice_distances_tf_park_data = json.load(f)
-
     # Construire les points des parkings à partir de selected_sites
     parkings_gdf = gpd.GeoDataFrame(
         [
@@ -219,7 +223,8 @@ def plot_parking_and_tf_with_basemap(
     tf_gdf = tf_gdf.to_crs(epsg=3857)
 
     # Initialiser les connexions transformateurs-parking
-    transformateur_connections = {tf["gml_id"]: 0 for tf in tf_data}
+    with open(asso_tf_bornes_path, 'r', encoding='utf-8') as f:
+        associations_data = json.load(f)
 
     # Tracer la carte
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -227,55 +232,11 @@ def plot_parking_and_tf_with_basemap(
     # Tracer la zone IRIS choisie
     selected_iris_gdf.plot(ax=ax, color='none', edgecolor='black', linewidth=2, label="Zone IRIS")
 
-    # Relier les parkings à leur transformateur le plus proche via la matrice des distances
-    for entry in matrice_distances_tf_park_data:
-        parking_id = entry["parking_id"]
-        distances = entry["distances"]  # Dictionnaire des distances transformateur -> parking
-
-        # Vérifier si le parking est sélectionné
-        if parking_id in parkings_gdf['gml_id'].values:
-            parking = parkings_gdf[parkings_gdf['gml_id'] == parking_id].iloc[0]
-
-            # Obtenir le nombre de bornes installées pour ce parking
-            nb_bornes = int(parking["nb_bornes_installees"])
-
-            # Connecter chaque borne du parking
-            for _ in range(nb_bornes):
-                # Trier les transformateurs par distance croissante
-                sorted_transformateurs = sorted(distances.items(), key=lambda x: x[1])
-
-                # Trouver un transformateur non saturé
-                closest_tf_id = None
-                for tf_id, distance in sorted_transformateurs:
-                    if transformateur_connections[tf_id] < max_connections_per_transformer:
-                        closest_tf_id = tf_id
-                        break
-
-                if closest_tf_id is not None:  # Si un transformateur disponible est trouvé
-                    # Ajouter une connexion au transformateur
-                    transformateur_connections[closest_tf_id] += 1
-
-                    # Obtenir les coordonnées du transformateur
-                    closest_tf = tf_gdf[tf_gdf['gml_id'] == closest_tf_id].iloc[0]
-
-                    # Tracer la ligne entre le parking et le transformateur
-                    ax.plot(
-                        [parking.geometry.x, closest_tf.geometry.x],
-                        [parking.geometry.y, closest_tf.geometry.y],
-                        color='gray',
-                        linewidth=1,
-                        alpha=0.5
-                    )
-
-                    # Retirer ce transformateur des distances pour éviter une nouvelle connexion inutile
-                    distances.pop(closest_tf_id)
-                else:
-                    print(f"Parking {parking_id} : Aucun transformateur disponible pour connecter une borne.")
-
-    # Colorer les transformateurs en fonction des connexions
-    for _, row in tf_gdf.iterrows():
-        color = 'red' if transformateur_connections[row["gml_id"]] >= 3 else 'green'
-        ax.scatter(row.geometry.x, row.geometry.y, color=color, s=100, label=f"Transformateur {row['gml_id']}")
+    # Tracer les transformateurs en fonction du nombre de connexions
+    for tf in tf_gdf.itertuples():
+        num_connections = len(associations_data[tf.gml_id])
+        color = 'red' if num_connections >= 3 else 'green'
+        ax.scatter(tf.geometry.x, tf.geometry.y, color=color, s=100, label=f"{tf.gml_id} ({num_connections} connexions)")
 
     # Tracer les parkings sélectionnés
     parkings_gdf['marker_size'] = parkings_gdf['nb_bornes_installees'] * 20 + 10
@@ -283,6 +244,16 @@ def plot_parking_and_tf_with_basemap(
         ax=ax, color='blue', markersize=parkings_gdf['marker_size'], label="Parkings sélectionnés"
     )
 
+    # Ajouter des lignes reliant chaque parking à ses transformateurs
+    for tf_id, borne_ids in associations_data.items():
+        for borne_id in borne_ids:
+            parking_id, _ = borne_id.split('.borne_')
+            print(parking_id)
+            print(parkings_gdf.loc[parkings_gdf['gml_id'] == parking_id, 'geometry'])
+            parking_point = parkings_gdf.loc[parkings_gdf['gml_id'] == parking_id, 'geometry'].values[0]
+            tf_point = tf_gdf.loc[tf_gdf['gml_id'] == tf_id, 'geometry'].values[0]
+            ax.plot([parking_point.x, tf_point.x], [parking_point.y, tf_point.y], color='gray', linestyle='--', linewidth=1)
+        
     # Ajouter des cercles de couverture pour les parkings
     patches = []
     for _, row in parkings_gdf.iterrows():
@@ -335,15 +306,18 @@ if __name__=="__main__":
     transfo_filtres = folder + "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_bat_park = folder + "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_tf_park = folder + "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    selected_sites_path = folder + "data_local/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    asso_tf_bornes_path = folder + "data_local/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+
 
     selected_sites = [{'gml_id': 'v_parking.5272', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.5981796810755085, 'lat': 48.131050605364955}}, {'gml_id': 'v_parking.6157', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.610297454250723, 'lat': 48.12509726328288}}, {'gml_id': 'v_parking.6169', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.6090822211252582, 'lat': 48.12395455634806}}, {'gml_id': 'v_parking.6179', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.6105903197320801, 'lat': 48.1236542823524}}, {'gml_id': 'v_parking.6181', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.6112321790149753, 'lat': 48.12425221113884}}, {'gml_id': 'v_parking.6143', 'nb_bornes_installees': 2, 'geo_point': {'lon': -1.6023755835466336, 'lat': 48.12566515944683}}, {'gml_id': 'v_parking.5271', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.5975394614392338, 'lat': 48.12915259974292}}, {'gml_id': 'v_parking.6174', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.610706506739586, 'lat': 48.12567738410442}}, {'gml_id': 'v_parking.6182', 'nb_bornes_installees': 1, 'geo_point': {'lon': -1.6071810676722722, 'lat': 48.12481266978351}}]
 
 
-    plot_parking_and_buildings_with_basemap(
-        iris_file, bat_filtres, zone_id, selected_sites, Rmax, output_file=None
-    )
+    # plot_parking_and_buildings_with_basemap(
+    #     iris_file, bat_filtres, zone_id, selected_sites_path, Rmax, output_file=None
+    # )
 
     plot_parking_and_tf_with_basemap(
-      iris_file, transfo_filtres, selected_sites, matrice_distances_tf_park, zone_id, Rmax, max_connections_per_transformer, output_file=None
+      iris_file, transfo_filtres, selected_sites_path, asso_tf_bornes_path, zone_id, Rmax, output_file=None
     )
 

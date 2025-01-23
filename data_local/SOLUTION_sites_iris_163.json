@@ -1,0 +1,74 @@
+[
+    {
+        "gml_id": "v_parking.259",
+        "nb_bornes_installees": 3,
+        "geo_point": {
+            "lon": -1.6662974569726896,
+            "lat": 48.126251262208235
+        }
+    },
+    {
+        "gml_id": "v_parking.3737",
+        "nb_bornes_installees": 3,
+        "geo_point": {
+            "lon": -1.677050150830271,
+            "lat": 48.13024935744978
+        }
+    },
+    {
+        "gml_id": "v_parking.6236",
+        "nb_bornes_installees": 2,
+        "geo_point": {
+            "lon": -1.6679059993991372,
+            "lat": 48.1257134413723
+        }
+    },
+    {
+        "gml_id": "v_parking.6388",
+        "nb_bornes_installees": 1,
+        "geo_point": {
+            "lon": -1.6699356611245526,
+            "lat": 48.13058145538034
+        }
+    },
+    {
+        "gml_id": "v_parking.631",
+        "nb_bornes_installees": 3,
+        "geo_point": {
+            "lon": -1.6663364235490388,
+            "lat": 48.12697682203028
+        }
+    },
+    {
+        "gml_id": "v_parking.6267",
+        "nb_bornes_installees": 1,
+        "geo_point": {
+            "lon": -1.6661667039032404,
+            "lat": 48.12828101953456
+        }
+    },
+    {
+        "gml_id": "v_parking.217",
+        "nb_bornes_installees": 3,
+        "geo_point": {
+            "lon": -1.6697674628718928,
+            "lat": 48.12695055580737
+        }
+    },
+    {
+        "gml_id": "v_parking.6871",
+        "nb_bornes_installees": 1,
+        "geo_point": {
+            "lon": -1.6750591581538372,
+            "lat": 48.130360950891706
+        }
+    },
+    {
+        "gml_id": "v_parking.632",
+        "nb_bornes_installees": 3,
+        "geo_point": {
+            "lon": -1.6667083642286962,
+            "lat": 48.125810358608476
+        }
+    }
+]

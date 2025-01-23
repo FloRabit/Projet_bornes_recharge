@@ -1,8 +1,9 @@
 import json
 from ortools.linear_solver import pywraplp
+from geopy.distance import geodesic
 
     
-def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rmax):
+def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, selected_sites_path, p, Rmax):
     """
     Résout le problème Maximal Covering Location Problem (MCLP) à partir de données JSON.
 
@@ -87,10 +88,68 @@ def mclp_deloc(bat_file_path, parkings_file_path, mat_distances_file_path, p, Rm
             for i in site_ids if x[i].solution_value() > 0
         ]
         max_coverage = solver.Objective().Value()
+        with open(selected_sites_path, 'w', encoding='utf-8') as f:
+            json.dump(selected_sites, f, ensure_ascii=False, indent=4)
         return selected_sites, max_coverage
     else:
         raise Exception("Le solveur n'a pas trouvé de solution optimale.")
 
+
+def association_bornes_transfo(selected_sites_path, transfo_filtres_path, asso_tf_bornes_path, max_connections_per_transformer):
+    # Charger les données des fichiers JSON
+    with open(selected_sites_path, 'r') as f:
+        selected_sites = json.load(f)
+        
+    with open(transfo_filtres_path, 'r') as f:
+        transfos = json.load(f)
+    
+    # Initialiser la capacité des transformateurs
+    transfos_capacity = {tf["gml_id"]: 0 for tf in transfos}
+    
+    # Convertir les coordonnées des transformateurs en tuples (lat, lon)
+    for tf in transfos:
+        lat, lon = map(float, tf["Geo Point"].split(", "))
+        tf["geo_point"] = (lat, lon)
+    
+    # Créer une structure de sortie
+    transfo_to_bornes_assoc = {tf["gml_id"]: [] for tf in transfos}
+    
+    # Associer chaque borne à un transformateur
+    for parking in selected_sites:
+        parking_id = parking["gml_id"]
+        nb_bornes = parking["nb_bornes_installees"]
+        parking_point = (parking["geo_point"]["lat"], parking["geo_point"]["lon"])
+        
+        for i in range(nb_bornes):
+            # Trouver le transformateur le plus proche non saturé
+            closest_tf = None
+            closest_distance = float('inf')
+            
+            for tf in transfos:
+                if transfos_capacity[tf["gml_id"]] < max_connections_per_transformer:  # Vérifier la saturation
+                    distance = geodesic(parking_point, tf["geo_point"]).meters
+                    if distance < closest_distance:
+                        closest_distance = distance
+                        closest_tf = tf
+            
+            if closest_tf:
+                # Créer un identifiant unique pour la borne
+                borne_id = f"{parking_id}.borne_{i+1}"
+                
+                # Associer la borne au transformateur
+                transfo_to_bornes_assoc[closest_tf["gml_id"]].append(borne_id)
+                
+                # Augmenter la capacité utilisée du transformateur
+                transfos_capacity[closest_tf["gml_id"]] += 1
+            else:
+                # Aucun transformateur disponible
+                raise ValueError(f"Aucun transformateur disponible pour la borne {i+1} du parking {parking_id}.")
+    
+    # Sauvegarder la sortie dans le fichier spécifié
+    with open(asso_tf_bornes_path, 'w') as f:
+        json.dump(transfo_to_bornes_assoc, f, indent=4)
+    
+    print("Association terminée. Résultats enregistrés dans", asso_tf_bornes_path)
 
 if __name__ == '__main__':
 
@@ -103,13 +162,19 @@ if __name__ == '__main__':
     bat_file = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
     iris_file = folder + "data_global/iris_version_rennes_metropole.json"
     parkings_file = folder + "data_global/parkings.json"
+    transfo_file = folder + "data_global/poste-electrique-total.csv"
+
 
     bat_filtres = folder + "data_local/batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     parkings_filtres = folder + "data_local/parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_bat_park = folder + "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
     matrice_distances_tf_park = folder + "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    transfo_filtres_path = folder + "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    selected_sites_path = folder + "data_local/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    asso_tf_bornes_path = folder + "data_local/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
 
-    selected_sites, rapport_couverture_cout = mclp_deloc(bat_filtres, parkings_filtres, matrice_distances_bat_park, p, Rmax, cout_unitaire)
+    selected_sites, rapport_couverture_cout = mclp_deloc(bat_filtres, parkings_filtres, matrice_distances_bat_park, selected_sites_path, p, Rmax)
+    association_bornes_transfo(selected_sites_path, transfo_filtres_path, asso_tf_bornes_path)
 
     print("Sites sélectionnés:", selected_sites)
     print("Couverture maximale:", rapport_couverture_cout)

@@ -1,0 +1,48 @@
+{
+    "tf.1278": [],
+    "tf.1363": [],
+    "tf.1708": [
+        "v_parking.3737.borne_1",
+        "v_parking.3737.borne_2",
+        "v_parking.3737.borne_3"
+    ],
+    "tf.2469": [
+        "v_parking.6267.borne_1"
+    ],
+    "tf.3159": [
+        "v_parking.6871.borne_1"
+    ],
+    "tf.3350": [],
+    "tf.3510": [
+        "v_parking.6236.borne_1",
+        "v_parking.6236.borne_2",
+        "v_parking.217.borne_1"
+    ],
+    "tf.3630": [],
+    "tf.3631": [
+        "v_parking.217.borne_2",
+        "v_parking.217.borne_3"
+    ],
+    "tf.3825": [
+        "v_parking.632.borne_1",
+        "v_parking.632.borne_2",
+        "v_parking.632.borne_3"
+    ],
+    "tf.4236": [],
+    "tf.4854": [
+        "v_parking.259.borne_1",
+        "v_parking.259.borne_2",
+        "v_parking.259.borne_3"
+    ],
+    "tf.4994": [],
+    "tf.6168": [],
+    "tf.6581": [
+        "v_parking.631.borne_1",
+        "v_parking.631.borne_2",
+        "v_parking.631.borne_3"
+    ],
+    "tf.6655": [],
+    "tf.6661": [
+        "v_parking.6388.borne_1"
+    ]
+}

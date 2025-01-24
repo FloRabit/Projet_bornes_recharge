@@ -158,20 +158,19 @@ if __name__ == '__main__':
     Rmax=500
     cout_unitaire = 3000
 
-    folder = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/codes/"
-    bat_file = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
-    iris_file = folder + "data_global/iris_version_rennes_metropole.json"
-    parkings_file = folder + "data_global/parkings.json"
-    transfo_file = folder + "data_global/poste-electrique-total.csv"
+    bat_file = "../batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
+    iris_file = "data_global/iris_version_rennes_metropole.json"
+    parkings_file = "data_global/parkings.json"
+    transfo_file = "data_global/poste-electrique-total.csv"
 
 
-    bat_filtres = folder + "data_local/batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    parkings_filtres = folder + "data_local/parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    matrice_distances_bat_park = folder + "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    matrice_distances_tf_park = folder + "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    transfo_filtres_path = folder + "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    selected_sites_path = folder + "data_local/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    asso_tf_bornes_path = folder + "data_local/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    bat_filtres = "data_local/batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    parkings_filtres = "data_local/parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    matrice_distances_bat_park = "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    matrice_distances_tf_park = "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    transfo_filtres_path = "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    selected_sites_path = "data_local/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    asso_tf_bornes_path = "data_local/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
 
     selected_sites, rapport_couverture_cout = mclp_deloc(bat_filtres, parkings_filtres, matrice_distances_bat_park, selected_sites_path, p, Rmax)
     association_bornes_transfo(selected_sites_path, transfo_filtres_path, asso_tf_bornes_path)

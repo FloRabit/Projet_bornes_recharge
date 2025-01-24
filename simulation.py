@@ -51,37 +51,51 @@ def couts (selected_sites_path, cout_unitaire) :
 
 
 if __name__ == "__main__":
-    # Paramètres
-    zone_id = "iris.163" #identifiant de la zone cible
-    N_ve_2000 = 50 #nombre de véhicules électriques à générer
-    cout_moy_22kW = 1000
-    Rmax=200
-    p=20
-    max_connections_per_transformer = 3
 
-    # Fichiers entrée/sortie
-    folder = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/codes/"
-    bat_file = "/Users/flo/Documents/Centrale_Supelec/2A/Projet_S7/batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
-    iris_file = folder + "data_global/iris_version_rennes_metropole.json"
-    parkings_file = folder + "data_global/parkings.json"
-    transfo_file = folder + "data_global/poste-electrique-total.csv"
+    ############################################################
+    # Paramètres de la simulation : Variables
+    ############################################################
+
+    zone_id = "iris.163"                    # identifiant de la zone cible
+    N_ve_2000 = 50                          # nombre de véhicules électriques à générer, normalisé pour 2000 habitants
+    cout_moy_22kW = 3000                    # cout moyen d'installation d'une borne de recharge 22kW
+    Rmax=200                                # rayon de couverture d'une borne de recharge
+    p=20                                    # nombre de bornes à sélectionner
+    max_connections_per_transformer = 3     # nombre maximal de bornes connectées à un poste de transformation pour être assuré de la sécurité du réseau
 
 
-    bat_filtres = folder + "data_local/batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    parkings_filtres = folder + "data_local/parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    transfo_filtres = folder + "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    matrice_distances_bat_park = folder + "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    matrice_distances_tf_park = folder + "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    selected_sites_path = folder + "output/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
-    asso_tf_bornes_path = folder + "output/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    ############################################################
+    # Paramètres de la simulation : Chemins des fichiers
+    ############################################################
 
-    img_plot_park_bat = folder + "output/img_plot_park_bat_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
-    img_plot_tf_park = folder + "output/img_plot_tf_park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
+    # Fichiers de données initiaux
+    bat_file = "../batiments-rennes-metropole.json" # fichier volumineux, mis à part pour pouvoir faire des git push
+    iris_file = "data_global/iris_version_rennes_metropole.json"
+    parkings_file = "data_global/parkings.json"
+    transfo_file = "data_global/poste-electrique-total.csv"
 
+    # Fichiers de données intermédiaires
+    bat_filtres = "data_local/batiments_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    parkings_filtres = "data_local/parkings_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    transfo_filtres = "data_local/transfo_rennes_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    matrice_distances_bat_park = "data_local/matrice_distances_bat-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    matrice_distances_tf_park = "data_local/matrice_distances_tf-park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+
+
+    # Fichiers de sortie
+    selected_sites_path = "output/SOLUTION_sites_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    asso_tf_bornes_path = "output/SOLUTION_asso_tf_bornes" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".json"
+    img_plot_park_bat = "output/img_plot_park_bat_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
+    img_plot_tf_park = "output/img_plot_tf_park_" + zone_id.split(".")[0] + "_" + zone_id.split(".")[1] + ".png"
+
+
+    ############################################################
+    # Simulation
+    ############################################################
 
     # Nettoyage des fichiers locaux
-    nettoyer_dossier(folder + "data_local")
-    nettoyer_dossier(folder + "output")
+    nettoyer_dossier("data_local")
+    nettoyer_dossier("output")
     
     # Traitement des données
     traitement_donnees.traiter_batiments(bat_file, iris_file, bat_filtres, zone_id, N_ve_2000)
@@ -106,6 +120,7 @@ if __name__ == "__main__":
     print ("\n")
     print("########################################################################################")
     print("Résultats de la simulation \n")
+    print("Zone cible :", zone_id)
     print("Nombre de sites sélectionnés :", sum(1 for _ in selected_sites))
     print("Nombre de bornes installées :", sum(site.get("nb_bornes_installees", 0) or 0 for site in selected_sites))
     print(f"Cout de l'installation : {cout_total} \n")

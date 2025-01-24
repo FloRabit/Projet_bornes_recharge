@@ -137,18 +137,20 @@ Ce module est dédié au nettoyage et au prétraitement des données :
 
 ## **Comment utiliser ce projet**
 
-1. **Installer les dépendances** :
+1. **Installez les dépendances** :
    Pour installer les dépendances :
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Exécuter l'algorithme MCLP** :
-   Lancez le fichier `mclp.py` avec vos fichiers JSON et les paramètres désirés (p, Rmax, etc.) pour obtenir les résultats d’optimisation.
+2. **Vérifiez la présence des bases de données**
+   Vérifiez que vous avez téléchargé toutes les bases de données indiquées plus haut en format json. Si vous avez utilisé un git clone, prêtez particulièrement attention à la base de donnée des batiments de Rennes, qui n'est pas inclue. Vérifiez également les chemins d'accès à ces bases de données dans le fichier `simulation.py`.
 
-3. **Visualiser les résultats** :
-   Utilisez `trace_cartes.py` pour générer une carte illustrant les parkings sélectionnés et leur impact.
-
-4. **Tester différents scénarios** :
+2. **Paramétrez la simulation** :
    Modifiez les paramètres dans `simulation.py` pour explorer différentes solutions et trouver celle qui correspond le mieux à vos contraintes.
+
+3. **Lancer la simulation**
+   Exécutez directement le fichier `simulation.py` pour obtenir les résultats de la simulation dans le dossier `output`
+
+
 

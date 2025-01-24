@@ -248,8 +248,6 @@ def plot_parking_and_tf_with_basemap(
     for tf_id, borne_ids in associations_data.items():
         for borne_id in borne_ids:
             parking_id, _ = borne_id.split('.borne_')
-            print(parking_id)
-            print(parkings_gdf.loc[parkings_gdf['gml_id'] == parking_id, 'geometry'])
             parking_point = parkings_gdf.loc[parkings_gdf['gml_id'] == parking_id, 'geometry'].values[0]
             tf_point = tf_gdf.loc[tf_gdf['gml_id'] == tf_id, 'geometry'].values[0]
             ax.plot([parking_point.x, tf_point.x], [parking_point.y, tf_point.y], color='gray', linestyle='--', linewidth=1)
